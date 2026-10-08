@@ -8,11 +8,13 @@ import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,14 +31,36 @@ public class AlarmActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Keep screen ON and show alarm over lock screen
+        getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+        );
+
+        if (Build.VERSION.SDK_INT >= 27) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+        }
+
         reminderId =
                 getIntent().getStringExtra("id");
 
         reminderTitle =
                 getIntent().getStringExtra("title");
 
-        if (reminderTitle == null) {
-            reminderTitle = "Pet Care Reminder";
+        if (reminderId == null) {
+            reminderId =
+                    String.valueOf(
+                            System.currentTimeMillis()
+                    );
+        }
+
+        if (reminderTitle == null ||
+                reminderTitle.trim().isEmpty()) {
+
+            reminderTitle =
+                    "Pet Care Reminder";
         }
 
         startAlarm();
@@ -59,6 +83,10 @@ public class AlarmActivity extends Activity {
 
         if (ringtone != null) {
 
+            if (Build.VERSION.SDK_INT >= 28) {
+                ringtone.setLooping(true);
+            }
+
             ringtone.play();
         }
 
@@ -78,7 +106,7 @@ public class AlarmActivity extends Activity {
                     500
             };
 
-            if (android.os.Build.VERSION.SDK_INT >= 26) {
+            if (Build.VERSION.SDK_INT >= 26) {
 
                 vibrator.vibrate(
                         VibrationEffect.createWaveform(
@@ -111,22 +139,22 @@ public class AlarmActivity extends Activity {
         );
 
         root.setPadding(
-                30,
-                30,
-                30,
-                30
+                40,
+                40,
+                40,
+                40
         );
 
-        TextView title =
+        TextView appTitle =
                 new TextView(this);
 
-        title.setText(
+        appTitle.setText(
                 "PETCARE"
         );
 
-        title.setTextSize(14);
+        appTitle.setTextSize(16);
 
-        title.setGravity(
+        appTitle.setGravity(
                 Gravity.CENTER
         );
 
@@ -145,9 +173,9 @@ public class AlarmActivity extends Activity {
 
         reminder.setPadding(
                 0,
-                25,
+                30,
                 0,
-                35
+                40
         );
 
         Button done =
@@ -172,7 +200,7 @@ public class AlarmActivity extends Activity {
         );
 
         root.addView(
-                title,
+                appTitle,
                 new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
@@ -230,10 +258,22 @@ public class AlarmActivity extends Activity {
 
         stopAlarm();
 
-        NotificationHelper.cancel(
-                this,
-                reminderId
-        );
+        // Cancel the notification directly
+        android.app.NotificationManager manager =
+                (android.app.NotificationManager)
+                        getSystemService(
+                                Context.NOTIFICATION_SERVICE
+                        );
+
+        if (manager != null &&
+                reminderId != null) {
+
+            manager.cancel(
+                    Math.abs(
+                            reminderId.hashCode() % 100000
+                    )
+            );
+        }
 
         finish();
     }
@@ -271,12 +311,15 @@ public class AlarmActivity extends Activity {
                 trigger
         );
 
+        int requestCode =
+                Math.abs(
+                        reminderId.hashCode()
+                ) + minutes;
+
         PendingIntent pendingIntent =
                 PendingIntent.getBroadcast(
                         this,
-                        Math.abs(
-                                reminderId.hashCode()
-                        ) + minutes,
+                        requestCode,
                         intent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                                 | PendingIntent.FLAG_IMMUTABLE
@@ -290,7 +333,7 @@ public class AlarmActivity extends Activity {
 
         if (alarmManager != null) {
 
-            if (android.os.Build.VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= 23) {
 
                 alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
