@@ -1,0 +1,1 @@
+# PetCare ProGuard rules
