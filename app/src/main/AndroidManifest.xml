@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Internet -->
     <uses-permission
@@ -25,6 +26,15 @@
     <uses-permission
         android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- Foreground service -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Android 14+ special-use foreground service -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+
     <application
         android:allowBackup="true"
         android:label="PetCare"
@@ -32,11 +42,13 @@
         android:theme="@style/Theme.PetCare"
         android:usesCleartextTraffic="true">
 
+
         <!-- Alarm screen -->
         <activity
             android:name=".AlarmActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+
 
         <!-- Main app -->
         <activity
@@ -55,15 +67,31 @@
 
         </activity>
 
+
         <!-- Reminder alarm receiver -->
         <receiver
             android:name=".ReminderReceiver"
             android:exported="false" />
 
+
         <!-- Snooze receiver -->
         <receiver
             android:name=".SnoozeReceiver"
             android:exported="false" />
+
+
+        <!-- Alarm foreground service -->
+        <service
+            android:name=".AlarmService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="PetCare alarm reminders" />
+
+        </service>
+
 
     </application>
 
