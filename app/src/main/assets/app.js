@@ -31,26 +31,30 @@ let tasks =
    STARTUP
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    loadTheme();
+        loadTheme();
 
-    const session =
-        JSON.parse(
-            localStorage.getItem(STORAGE.session) || "null"
-        );
+        const session =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE.session
+                ) || "null"
+            );
 
-    if (session) {
-        showApp();
-    } else {
-        showAuth();
+        if (session) {
+            showApp();
+        } else {
+            showAuth();
+        }
+
+        renderPet();
+        renderReminders();
+        renderTasks();
     }
-
-    renderPet();
-    renderReminders();
-    renderTasks();
-
-});
+);
 
 
 /* =========================================================
@@ -59,39 +63,91 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function showAuth() {
 
-    document
-        .getElementById("authScreen")
-        .classList.remove("hidden");
+    const authScreen =
+        document.getElementById(
+            "authScreen"
+        );
 
-    document
-        .getElementById("appScreen")
-        .classList.add("hidden");
+    const appScreen =
+        document.getElementById(
+            "appScreen"
+        );
+
+    if (authScreen) {
+        authScreen.classList.remove(
+            "hidden"
+        );
+    }
+
+    if (appScreen) {
+        appScreen.classList.add(
+            "hidden"
+        );
+    }
 }
 
 
 function showApp() {
 
-    document
-        .getElementById("authScreen")
-        .classList.add("hidden");
+    const authScreen =
+        document.getElementById(
+            "authScreen"
+        );
 
-    document
-        .getElementById("appScreen")
-        .classList.remove("hidden");
+    const appScreen =
+        document.getElementById(
+            "appScreen"
+        );
+
+    if (authScreen) {
+        authScreen.classList.add(
+            "hidden"
+        );
+    }
+
+    if (appScreen) {
+        appScreen.classList.remove(
+            "hidden"
+        );
+    }
 
     const session =
         JSON.parse(
-            localStorage.getItem(STORAGE.session) || "{}"
+            localStorage.getItem(
+                STORAGE.session
+            ) || "{}"
         );
 
-    document.getElementById("welcomeName").textContent =
-        "Hi, " + (session.name || "there");
+    const welcomeName =
+        document.getElementById(
+            "welcomeName"
+        );
 
-    document.getElementById("profileName").textContent =
-        session.name || "User";
+    const profileName =
+        document.getElementById(
+            "profileName"
+        );
 
-    document.getElementById("profileEmail").textContent =
-        session.email || "-";
+    const profileEmail =
+        document.getElementById(
+            "profileEmail"
+        );
+
+    if (welcomeName) {
+        welcomeName.textContent =
+            "Hi, " +
+            (session.name || "there");
+    }
+
+    if (profileName) {
+        profileName.textContent =
+            session.name || "User";
+    }
+
+    if (profileEmail) {
+        profileEmail.textContent =
+            session.email || "-";
+    }
 
     renderPet();
     renderReminders();
@@ -101,43 +157,106 @@ function showApp() {
 
 function showLogin() {
 
-    document
-        .getElementById("loginForm")
-        .classList.remove("hidden");
+    const loginForm =
+        document.getElementById(
+            "loginForm"
+        );
 
-    document
-        .getElementById("signupForm")
-        .classList.add("hidden");
+    const signupForm =
+        document.getElementById(
+            "signupForm"
+        );
 
-    document
-        .getElementById("loginTab")
-        .classList.add("active");
+    const loginTab =
+        document.getElementById(
+            "loginTab"
+        );
 
-    document
-        .getElementById("signupTab")
-        .classList.remove("active");
+    const signupTab =
+        document.getElementById(
+            "signupTab"
+        );
+
+    if (loginForm) {
+        loginForm.classList.remove(
+            "hidden"
+        );
+    }
+
+    if (signupForm) {
+        signupForm.classList.add(
+            "hidden"
+        );
+    }
+
+    if (loginTab) {
+        loginTab.classList.add(
+            "active"
+        );
+    }
+
+    if (signupTab) {
+        signupTab.classList.remove(
+            "active"
+        );
+    }
 }
 
 
 function showSignup() {
 
-    document
-        .getElementById("loginForm")
-        .classList.add("hidden");
+    const loginForm =
+        document.getElementById(
+            "loginForm"
+        );
 
-    document
-        .getElementById("signupForm")
-        .classList.remove("hidden");
+    const signupForm =
+        document.getElementById(
+            "signupForm"
+        );
 
-    document
-        .getElementById("loginTab")
-        .classList.remove("active");
+    const loginTab =
+        document.getElementById(
+            "loginTab"
+        );
 
-    document
-        .getElementById("signupTab")
-        .classList.add("active");
+    const signupTab =
+        document.getElementById(
+            "signupTab"
+        );
+
+    if (loginForm) {
+        loginForm.classList.add(
+            "hidden"
+        );
+    }
+
+    if (signupForm) {
+        signupForm.classList.remove(
+            "hidden"
+        );
+    }
+
+    if (loginTab) {
+        loginTab.classList.remove(
+            "active"
+        );
+    }
+
+    if (signupTab) {
+        signupTab.classList.add(
+            "active"
+        );
+    }
 }
 
+
+/*
+ * TEMPORARY LOCAL AUTH
+ *
+ * This will be replaced with Supabase Auth
+ * in the database step.
+ */
 
 function signup() {
 
@@ -151,7 +270,8 @@ function signup() {
         document
             .getElementById("signupEmail")
             .value
-            .trim();
+            .trim()
+            .toLowerCase();
 
     const password =
         document
@@ -160,7 +280,18 @@ function signup() {
 
     if (!name || !email || !password) {
 
-        alert("Please fill all fields.");
+        alert(
+            "Please fill all fields."
+        );
+
+        return;
+    }
+
+    if (password.length < 6) {
+
+        alert(
+            "Password must be at least 6 characters."
+        );
 
         return;
     }
@@ -194,7 +325,8 @@ function login() {
         document
             .getElementById("loginEmail")
             .value
-            .trim();
+            .trim()
+            .toLowerCase();
 
     const password =
         document
@@ -203,7 +335,9 @@ function login() {
 
     const user =
         JSON.parse(
-            localStorage.getItem(STORAGE.user) || "null"
+            localStorage.getItem(
+                STORAGE.user
+            ) || "null"
         );
 
     if (!user) {
@@ -220,7 +354,9 @@ function login() {
         password !== user.password
     ) {
 
-        alert("Incorrect email or password.");
+        alert(
+            "Incorrect email or password."
+        );
 
         return;
     }
@@ -263,19 +399,22 @@ function openPage(page) {
         "camera"
     ];
 
-    pages.forEach(name => {
+    pages.forEach(
+        name => {
 
-        const element =
-            document.getElementById(
-                name + "Page"
-            );
+            const element =
+                document.getElementById(
+                    name + "Page"
+                );
 
-        if (element) {
-            element.classList.remove(
-                "active-page"
-            );
+            if (element) {
+
+                element.classList.remove(
+                    "active-page"
+                );
+            }
         }
-    });
+    );
 
     const target =
         document.getElementById(
@@ -283,6 +422,7 @@ function openPage(page) {
         );
 
     if (target) {
+
         target.classList.add(
             "active-page"
         );
@@ -290,17 +430,24 @@ function openPage(page) {
 
     document
         .querySelectorAll(".nav-item")
-        .forEach(item => {
+        .forEach(
+            item => {
 
-            item.classList.remove("active");
+                item.classList.remove(
+                    "active"
+                );
 
-            if (
-                item.dataset.page === page
-            ) {
-                item.classList.add("active");
+                if (
+                    item.dataset.page ===
+                    page
+                ) {
+
+                    item.classList.add(
+                        "active"
+                    );
+                }
             }
-
-        });
+        );
 
     window.scrollTo({
         top: 0,
@@ -315,17 +462,33 @@ function openPage(page) {
 
 function openProfile() {
 
-    document
-        .getElementById("profileModal")
-        .classList.remove("hidden");
+    const modal =
+        document.getElementById(
+            "profileModal"
+        );
+
+    if (modal) {
+
+        modal.classList.remove(
+            "hidden"
+        );
+    }
 }
 
 
 function closeProfile() {
 
-    document
-        .getElementById("profileModal")
-        .classList.add("hidden");
+    const modal =
+        document.getElementById(
+            "profileModal"
+        );
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+    }
 }
 
 
@@ -341,18 +504,25 @@ function loadTheme() {
         );
 
     if (theme === "dark") {
-        document.body.classList.add("dark");
+
+        document.body.classList.add(
+            "dark"
+        );
     }
 }
 
 
 function toggleTheme() {
 
-    document.body.classList.toggle("dark");
+    document.body.classList.toggle(
+        "dark"
+    );
 
     localStorage.setItem(
         STORAGE.theme,
-        document.body.classList.contains("dark")
+        document.body.classList.contains(
+            "dark"
+        )
             ? "dark"
             : "light"
     );
@@ -400,19 +570,31 @@ function savePet() {
 
     if (!name) {
 
-        alert("Please enter your pet's name.");
+        alert(
+            "Please enter your pet's name."
+        );
 
         return;
     }
 
     pet = {
+
         name,
+
         species,
+
         breed,
+
         gender,
+
         dob,
+
         weight,
-        photo: pet ? pet.photo || "" : ""
+
+        photo:
+            pet
+                ? pet.photo || ""
+                : ""
     };
 
     localStorage.setItem(
@@ -422,91 +604,152 @@ function savePet() {
 
     renderPet();
 
-    alert("Pet profile saved.");
+    alert(
+        "Pet profile saved."
+    );
 }
 
 
 function renderPet() {
 
-    if (!pet) {
-
+    const homePetName =
         document.getElementById(
             "homePetName"
-        ).textContent =
-            "Add your pet";
+        );
 
+    const homePetDetails =
         document.getElementById(
             "homePetDetails"
-        ).textContent =
-            "Create a pet profile";
+        );
+
+    if (!pet) {
+
+        if (homePetName) {
+
+            homePetName.textContent =
+                "Add your pet";
+        }
+
+        if (homePetDetails) {
+
+            homePetDetails.textContent =
+                "Create a pet profile";
+        }
 
         return;
     }
 
-    document.getElementById(
-        "homePetName"
-    ).textContent =
-        pet.name;
+    if (homePetName) {
+
+        homePetName.textContent =
+            pet.name;
+    }
 
     const details = [];
 
     if (pet.species) {
-        details.push(pet.species);
+
+        details.push(
+            pet.species
+        );
     }
 
     if (pet.breed) {
-        details.push(pet.breed);
+
+        details.push(
+            pet.breed
+        );
     }
 
     if (pet.weight) {
+
         details.push(
             pet.weight + " kg"
         );
     }
 
-    document.getElementById(
-        "homePetDetails"
-    ).textContent =
-        details.length
-            ? details.join(" • ")
-            : "Pet profile";
+    if (homePetDetails) {
 
-    document.getElementById(
-        "petName"
-    ).value =
-        pet.name || "";
+        homePetDetails.textContent =
+            details.length
+                ? details.join(" • ")
+                : "Pet profile";
+    }
 
-    document.getElementById(
-        "petSpecies"
-    ).value =
-        pet.species || "";
+    const petName =
+        document.getElementById(
+            "petName"
+        );
 
-    document.getElementById(
-        "petBreed"
-    ).value =
-        pet.breed || "";
+    const petSpecies =
+        document.getElementById(
+            "petSpecies"
+        );
 
-    document.getElementById(
-        "petGender"
-    ).value =
-        pet.gender || "";
+    const petBreed =
+        document.getElementById(
+            "petBreed"
+        );
 
-    document.getElementById(
-        "petDob"
-    ).value =
-        pet.dob || "";
+    const petGender =
+        document.getElementById(
+            "petGender"
+        );
 
-    document.getElementById(
-        "petWeight"
-    ).value =
-        pet.weight || "";
+    const petDob =
+        document.getElementById(
+            "petDob"
+        );
 
-    if (pet.photo) {
+    const petWeight =
+        document.getElementById(
+            "petWeight"
+        );
 
+    if (petName) {
+        petName.value =
+            pet.name || "";
+    }
+
+    if (petSpecies) {
+        petSpecies.value =
+            pet.species || "";
+    }
+
+    if (petBreed) {
+        petBreed.value =
+            pet.breed || "";
+    }
+
+    if (petGender) {
+        petGender.value =
+            pet.gender || "";
+    }
+
+    if (petDob) {
+        petDob.value =
+            pet.dob || "";
+    }
+
+    if (petWeight) {
+        petWeight.value =
+            pet.weight || "";
+    }
+
+    const preview =
         document.getElementById(
             "petPhotoPreview"
-        ).innerHTML =
-            `<img src="${pet.photo}" alt="Pet">`;
+        );
+
+    if (
+        preview &&
+        pet.photo
+    ) {
+
+        preview.innerHTML =
+            `<img src="${escapeHTML(
+                pet.photo
+            )}" alt="Pet">`;
     }
 }
 
@@ -569,6 +812,10 @@ function renderTasks() {
             "taskCount"
         );
 
+    if (!container || !count) {
+        return;
+    }
+
     if (!tasks.length) {
 
         container.innerHTML = `
@@ -588,54 +835,80 @@ function renderTasks() {
 
     let completed = 0;
 
-    tasks.forEach((task, index) => {
+    tasks.forEach(
+        (task, index) => {
 
-        if (task.done) {
-            completed++;
+            if (task.done) {
+                completed++;
+            }
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "task-card glass" +
+                (
+                    task.done
+                        ? " completed"
+                        : ""
+                );
+
+            card.innerHTML = `
+
+                <button
+                    class="task-check ${
+                        task.done
+                            ? "done"
+                            : ""
+                    }"
+                    onclick="toggleTask(${index})"
+                >
+                    ${
+                        task.done
+                            ? "✓"
+                            : ""
+                    }
+                </button>
+
+                <div class="task-info">
+
+                    <strong>
+                        ${escapeHTML(
+                            task.title
+                        )}
+                    </strong>
+
+                    <span>
+                        ${escapeHTML(
+                            task.time ||
+                            "Today"
+                        )}
+                    </span>
+
+                </div>
+            `;
+
+            container.appendChild(
+                card
+            );
         }
-
-        const card =
-            document.createElement("div");
-
-        card.className =
-            "task-card glass" +
-            (task.done
-                ? " completed"
-                : "");
-
-        card.innerHTML = `
-
-            <button
-                class="task-check ${
-                    task.done ? "done" : ""
-                }"
-                onclick="toggleTask(${index})"
-            >
-                ${task.done ? "✓" : ""}
-            </button>
-
-            <div class="task-info">
-
-                <strong>
-                    ${escapeHTML(task.title)}
-                </strong>
-
-                <span>
-                    ${escapeHTML(task.time || "Today")}
-                </span>
-
-            </div>
-        `;
-
-        container.appendChild(card);
-    });
+    );
 
     count.textContent =
-        String(tasks.length - completed);
+        String(
+            tasks.length -
+            completed
+        );
 }
 
 
 function toggleTask(index) {
+
+    if (!tasks[index]) {
+        return;
+    }
 
     tasks[index].done =
         !tasks[index].done;
@@ -657,26 +930,38 @@ function addReminder() {
 
     const title =
         document
-            .getElementById("reminderTitle")
+            .getElementById(
+                "reminderTitle"
+            )
             .value
             .trim();
 
     const date =
         document
-            .getElementById("reminderDate")
+            .getElementById(
+                "reminderDate"
+            )
             .value;
 
     const time =
         document
-            .getElementById("reminderTime")
+            .getElementById(
+                "reminderTime"
+            )
             .value;
 
     const repeat =
         document
-            .getElementById("reminderRepeat")
+            .getElementById(
+                "reminderRepeat"
+            )
             .value;
 
-    if (!title || !date || !time) {
+    if (
+        !title ||
+        !date ||
+        !time
+    ) {
 
         alert(
             "Enter reminder name, date and time."
@@ -696,12 +981,16 @@ function addReminder() {
         )
     ) {
 
-        alert("Invalid date or time.");
+        alert(
+            "Invalid date or time."
+        );
 
         return;
     }
 
-    if (when <= new Date()) {
+    if (
+        when <= new Date()
+    ) {
 
         alert(
             "Choose a future date and time."
@@ -726,7 +1015,9 @@ function addReminder() {
             when.getTime()
     };
 
-    reminders.push(reminder);
+    reminders.push(
+        reminder
+    );
 
     saveReminders();
 
@@ -734,9 +1025,14 @@ function addReminder() {
         reminder
     );
 
-    document.getElementById(
-        "reminderTitle"
-    ).value = "";
+    const reminderTitle =
+        document.getElementById(
+            "reminderTitle"
+        );
+
+    if (reminderTitle) {
+        reminderTitle.value = "";
+    }
 
     renderReminders();
 
@@ -750,7 +1046,9 @@ function saveReminders() {
 
     localStorage.setItem(
         STORAGE.reminders,
-        JSON.stringify(reminders)
+        JSON.stringify(
+            reminders
+        )
     );
 }
 
@@ -784,78 +1082,87 @@ function renderReminders() {
     reminders
         .sort(
             (a, b) =>
-                a.timestamp - b.timestamp
+                a.timestamp -
+                b.timestamp
         )
-        .forEach(reminder => {
+        .forEach(
+            reminder => {
 
-            const card =
-                document.createElement("div");
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
-            card.className =
-                "reminder-card glass";
+                card.className =
+                    "reminder-card glass";
 
-            const repeatText =
-                reminder.repeat === "daily"
-                    ? "Every day"
-                    : reminder.repeat === "weekly"
-                        ? "Every week"
-                        : "Once";
+                const repeatText =
+                    reminder.repeat ===
+                    "daily"
+                        ? "Every day"
+                        : reminder.repeat ===
+                          "weekly"
+                            ? "Every week"
+                            : "Once";
 
-            card.innerHTML = `
+                card.innerHTML = `
 
-                <div class="reminder-icon">
+                    <div class="reminder-icon">
 
-                    <svg viewBox="0 0 24 24">
+                        <svg viewBox="0 0 24 24">
 
-                        <path
-                            d="M18 8
-                            C18 5 16 3 12 3
-                            C8 3 6 5 6 8
-                            V13
-                            L4 17
-                            H20
-                            L18 13Z"
-                        />
+                            <path
+                                d="M18 8
+                                C18 5 16 3 12 3
+                                C8 3 6 5 6 8
+                                V13
+                                L4 17
+                                H20
+                                L18 13Z"
+                            />
 
-                        <path
-                            d="M10 21
-                            H14"
-                        />
+                            <path
+                                d="M10 21
+                                H14"
+                            />
 
-                    </svg>
+                        </svg>
 
-                </div>
+                    </div>
 
-                <div class="reminder-info">
+                    <div class="reminder-info">
 
-                    <strong>
-                        ${escapeHTML(
-                            reminder.title
-                        )}
-                    </strong>
+                        <strong>
+                            ${escapeHTML(
+                                reminder.title
+                            )}
+                        </strong>
 
-                    <span>
-                        ${formatReminderDate(
-                            reminder.timestamp
-                        )}
-                        •
-                        ${repeatText}
-                    </span>
+                        <span>
+                            ${formatReminderDate(
+                                reminder.timestamp
+                            )}
+                            •
+                            ${repeatText}
+                        </span>
 
-                </div>
+                    </div>
 
-                <button
-                    class="delete-reminder"
-                    onclick="deleteReminder(
-                        ${reminder.id}
-                    )"
-                >
-                    ×
-                </button>
-            `;
+                    <button
+                        class="delete-reminder"
+                        onclick="deleteReminder(
+                            ${reminder.id}
+                        )"
+                    >
+                        ×
+                    </button>
+                `;
 
-            list.appendChild(card);
-        });
+                list.appendChild(
+                    card
+                );
+            }
+        );
 }
 
 
@@ -871,23 +1178,28 @@ function deleteReminder(id) {
 
     renderReminders();
 
-    cancelNativeReminder(id);
+    cancelNativeReminder(
+        id
+    );
 }
 
 
-function formatReminderDate(timestamp) {
+function formatReminderDate(
+    timestamp
+) {
 
-    return new Date(timestamp)
-        .toLocaleString(
-            [],
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            }
-        );
+    return new Date(
+        timestamp
+    ).toLocaleString(
+        [],
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
 }
 
 
@@ -900,42 +1212,132 @@ function scheduleNativeReminder(
 ) {
 
     if (
-        window.AndroidPetCare &&
-        AndroidPetCare.scheduleReminder
+        !window.AndroidPetCare
     ) {
+        return;
+    }
+
+    if (
+        typeof AndroidPetCare.scheduleReminder
+        !== "function"
+    ) {
+        return;
+    }
+
+    try {
 
         AndroidPetCare.scheduleReminder(
 
-            String(reminder.id),
+            String(
+                reminder.id
+            ),
 
-            reminder.title,
+            String(
+                reminder.title
+            ),
 
-            String(reminder.timestamp),
+            String(
+                reminder.timestamp
+            ),
 
-            reminder.repeat
+            String(
+                reminder.repeat || "once"
+            )
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Native reminder error:",
+            error
         );
     }
 }
 
 
-function cancelNativeReminder(id) {
+function cancelNativeReminder(
+    id
+) {
 
     if (
-        window.AndroidPetCare &&
-        AndroidPetCare.cancelReminder
+        !window.AndroidPetCare
     ) {
+        return;
+    }
+
+    if (
+        typeof AndroidPetCare.cancelReminder
+        !== "function"
+    ) {
+        return;
+    }
+
+    try {
 
         AndroidPetCare.cancelReminder(
             String(id)
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Native cancel error:",
+            error
         );
     }
 }
 
 
 /* =========================================================
-   VET SEARCH
+   LOCATION / VET SEARCH
 ========================================================= */
 
+/*
+ * Check whether browser/WebView geolocation exists.
+ */
+function locationSupported() {
+
+    return (
+        "geolocation" in
+        navigator
+    );
+}
+
+
+/*
+ * Show location loading state.
+ */
+function showVetLoading() {
+
+    const results =
+        document.getElementById(
+            "vetResults"
+        );
+
+    if (!results) {
+        return;
+    }
+
+    results.innerHTML = `
+        <div class="empty-state glass">
+
+            <p>
+                Getting your location...
+            </p>
+
+            <p>
+                Please allow location access
+                when Android asks.
+            </p>
+
+        </div>
+    `;
+}
+
+
+/*
+ * Main nearby vet function.
+ */
 function findVets() {
 
     const results =
@@ -943,18 +1345,22 @@ function findVets() {
             "vetResults"
         );
 
-    results.innerHTML = `
-        <div class="empty-state glass">
-            Finding nearby veterinary hospitals...
-        </div>
-    `;
+    if (!results) {
+        return;
+    }
 
-    if (!navigator.geolocation) {
+    showVetLoading();
+
+    if (!locationSupported()) {
 
         results.innerHTML = `
             <div class="empty-state glass">
-                Location is not supported
-                on this device.
+
+                <p>
+                    Location is not supported
+                    on this device.
+                </p>
+
             </div>
         `;
 
@@ -965,65 +1371,202 @@ function findVets() {
 
         position => {
 
-            const lat =
+            const latitude =
                 position.coords.latitude;
 
-            const lon =
+            const longitude =
                 position.coords.longitude;
 
-            /*
-             * Opens Google Maps veterinary search
-             * near the user's current location.
-             */
-            const mapsURL =
-                `https://www.google.com/maps/search/veterinary+hospital/@${lat},${lon},14z`;
+            const accuracy =
+                Math.round(
+                    position.coords.accuracy
+                );
 
-            results.innerHTML = `
-
-                <div class="vet-card glass">
-
-                    <h3>
-                        Nearby veterinary hospitals
-                    </h3>
-
-                    <p>
-                        Search results will open
-                        in Google Maps.
-                    </p>
-
-                    <div class="vet-actions">
-
-                        <button
-                            class="vet-action"
-                            onclick="openExternal(
-                                '${mapsURL}'
-                            )"
-                        >
-                            Open Maps
-                        </button>
-
-                    </div>
-
-                </div>
-            `;
+            showNearbyVetResults(
+                latitude,
+                longitude,
+                accuracy
+            );
         },
 
         error => {
 
-            results.innerHTML = `
-                <div class="empty-state glass">
-                    Please allow location access
-                    to find nearby vets.
-                </div>
-            `;
+            handleLocationError(
+                error
+            );
         },
 
         {
             enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 60000
+
+            timeout: 15000,
+
+            maximumAge: 30000
         }
     );
+}
+
+
+/*
+ * Display nearby veterinary search.
+ */
+function showNearbyVetResults(
+    latitude,
+    longitude,
+    accuracy
+) {
+
+    const results =
+        document.getElementById(
+            "vetResults"
+        );
+
+    if (!results) {
+        return;
+    }
+
+    /*
+     * Google Maps search around
+     * current GPS coordinates.
+     */
+    const mapsURL =
+        "https://www.google.com/maps/search/" +
+        encodeURIComponent(
+            "veterinary hospital"
+        ) +
+        "/@" +
+        latitude +
+        "," +
+        longitude +
+        ",14z";
+
+    /*
+     * Avian/exotic veterinary search.
+     */
+    const avianURL =
+        "https://www.google.com/maps/search/" +
+        encodeURIComponent(
+            "avian exotic veterinary hospital"
+        ) +
+        "/@" +
+        latitude +
+        "," +
+        longitude +
+        ",14z";
+
+    results.innerHTML = `
+
+        <div class="vet-card glass">
+
+            <h3>
+                Nearby veterinary hospitals
+            </h3>
+
+            <p>
+                Location found successfully.
+            </p>
+
+            <p>
+                GPS accuracy:
+                approximately
+                ${accuracy} metres
+            </p>
+
+            <div class="vet-actions">
+
+                <button
+                    class="vet-action"
+                    onclick="openExternal(
+                        '${mapsURL}'
+                    )"
+                >
+                    Nearby Vets
+                </button>
+
+                <button
+                    class="vet-action"
+                    onclick="openExternal(
+                        '${avianURL}'
+                    )"
+                >
+                    Avian / Exotic Vets
+                </button>
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+/*
+ * Location error handling.
+ */
+function handleLocationError(
+    error
+) {
+
+    const results =
+        document.getElementById(
+            "vetResults"
+        );
+
+    if (!results) {
+        return;
+    }
+
+    let message =
+        "Unable to get your location.";
+
+    if (error) {
+
+        if (
+            error.code ===
+            error.PERMISSION_DENIED
+        ) {
+
+            message =
+                "Location permission was denied. " +
+                "Please allow PetCare to access " +
+                "your location from Android Settings.";
+
+        } else if (
+            error.code ===
+            error.POSITION_UNAVAILABLE
+        ) {
+
+            message =
+                "Location is currently unavailable. " +
+                "Please turn ON GPS/location.";
+
+        } else if (
+            error.code ===
+            error.TIMEOUT
+        ) {
+
+            message =
+                "Location request timed out. " +
+                "Please try again.";
+        }
+    }
+
+    results.innerHTML = `
+
+        <div class="empty-state glass">
+
+            <p>
+                ${escapeHTML(message)}
+            </p>
+
+            <button
+                class="vet-action"
+                onclick="findVets()"
+            >
+                Try Again
+            </button>
+
+        </div>
+    `;
 }
 
 
@@ -1031,12 +1574,30 @@ function findVets() {
    EXTERNAL LINKS
 ========================================================= */
 
-function openExternal(url) {
+function openExternal(
+    url
+) {
 
-    window.open(
-        url,
-        "_blank"
-    );
+    if (!url) {
+        return;
+    }
+
+    /*
+     * Try opening an external page.
+     * This keeps the existing WebView app intact.
+     */
+    try {
+
+        window.open(
+            url,
+            "_blank"
+        );
+
+    } catch (error) {
+
+        window.location.href =
+            url;
+    }
 }
 
 
@@ -1044,7 +1605,9 @@ function openExternal(url) {
    SECURITY / HTML ESCAPE
 ========================================================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     return String(value)
         .replace(
