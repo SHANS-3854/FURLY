@@ -5,9 +5,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -21,9 +18,6 @@ import android.widget.TextView;
 
 public class AlarmActivity extends Activity {
 
-    private Ringtone ringtone;
-    private Vibrator vibrator;
-
     private String reminderId;
     private String reminderTitle;
 
@@ -31,7 +25,10 @@ public class AlarmActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Keep screen ON and show alarm over lock screen
+        /*
+         * Keep screen ON
+         * Show over lock screen
+         */
         getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -63,66 +60,7 @@ public class AlarmActivity extends Activity {
                     "Pet Care Reminder";
         }
 
-        startAlarm();
-
         showAlarmUI();
-    }
-
-    private void startAlarm() {
-
-        Uri sound =
-                RingtoneManager.getDefaultUri(
-                        RingtoneManager.TYPE_ALARM
-                );
-
-        ringtone =
-                RingtoneManager.getRingtone(
-                        this,
-                        sound
-                );
-
-        if (ringtone != null) {
-
-            if (Build.VERSION.SDK_INT >= 28) {
-                ringtone.setLooping(true);
-            }
-
-            ringtone.play();
-        }
-
-        vibrator =
-                (Vibrator)
-                        getSystemService(
-                                Context.VIBRATOR_SERVICE
-                        );
-
-        if (vibrator != null) {
-
-            long[] pattern = {
-                    0,
-                    1000,
-                    500,
-                    1000,
-                    500
-            };
-
-            if (Build.VERSION.SDK_INT >= 26) {
-
-                vibrator.vibrate(
-                        VibrationEffect.createWaveform(
-                                pattern,
-                                0
-                        )
-                );
-
-            } else {
-
-                vibrator.vibrate(
-                        pattern,
-                        0
-                );
-            }
-        }
     }
 
     private void showAlarmUI() {
@@ -152,7 +90,7 @@ public class AlarmActivity extends Activity {
                 "PETCARE"
         );
 
-        appTitle.setTextSize(16);
+        appTitle.setTextSize(18);
 
         appTitle.setGravity(
                 Gravity.CENTER
@@ -254,33 +192,30 @@ public class AlarmActivity extends Activity {
         setContentView(root);
     }
 
+    /*
+     * DONE
+     */
     private void finishAlarm() {
 
-        stopAlarm();
+        stopAlarmService();
 
-        // Cancel the notification directly
-        android.app.NotificationManager manager =
-                (android.app.NotificationManager)
-                        getSystemService(
-                                Context.NOTIFICATION_SERVICE
-                        );
-
-        if (manager != null &&
-                reminderId != null) {
-
-            manager.cancel(
-                    Math.abs(
-                            reminderId.hashCode() % 100000
-                    )
-            );
-        }
+        cancelNotification();
 
         finish();
     }
 
+    /*
+     * SNOOZE
+     */
     private void snooze(int minutes) {
 
-        stopAlarm();
+        stopAlarmService();
+
+        cancelNotification();
+
+        long trigger =
+                System.currentTimeMillis()
+                        + minutes * 60L * 1000L;
 
         Intent intent =
                 new Intent(
@@ -301,10 +236,6 @@ public class AlarmActivity extends Activity {
                 "title",
                 reminderTitle
         );
-
-        long trigger =
-                System.currentTimeMillis()
-                        + minutes * 60L * 1000L;
 
         intent.putExtra(
                 "timestamp",
@@ -333,7 +264,26 @@ public class AlarmActivity extends Activity {
 
         if (alarmManager != null) {
 
-            if (Build.VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= 31) {
+
+                if (alarmManager.canScheduleExactAlarms()) {
+
+                    alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            trigger,
+                            pendingIntent
+                    );
+
+                } else {
+
+                    alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            trigger,
+                            pendingIntent
+                    );
+                }
+
+            } else if (Build.VERSION.SDK_INT >= 23) {
 
                 alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
@@ -354,24 +304,59 @@ public class AlarmActivity extends Activity {
         finish();
     }
 
-    private void stopAlarm() {
+    /*
+     * Stop foreground alarm service
+     */
+    private void stopAlarmService() {
 
-        if (ringtone != null &&
-                ringtone.isPlaying()) {
+        Intent serviceIntent =
+                new Intent(
+                        this,
+                        AlarmService.class
+                );
 
-            ringtone.stop();
+        try {
+
+            if (Build.VERSION.SDK_INT >= 26) {
+
+                stopService(serviceIntent);
+
+            } else {
+
+                stopService(serviceIntent);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
         }
+    }
 
-        if (vibrator != null) {
+    /*
+     * Cancel active notification
+     */
+    private void cancelNotification() {
 
-            vibrator.cancel();
+        android.app.NotificationManager manager =
+                (android.app.NotificationManager)
+                        getSystemService(
+                                Context.NOTIFICATION_SERVICE
+                        );
+
+        if (manager != null) {
+
+            manager.cancel(2001);
+
+            manager.cancel(
+                    Math.abs(
+                            reminderId.hashCode() % 100000
+                    )
+            );
         }
     }
 
     @Override
     protected void onDestroy() {
-
-        stopAlarm();
 
         super.onDestroy();
     }
