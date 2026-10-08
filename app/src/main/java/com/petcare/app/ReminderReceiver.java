@@ -1,8 +1,10 @@
 package com.petcare.app;
 
 import android.app.AlarmManager;
-import android.content.BroadcastReceiver;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -27,6 +29,10 @@ public class ReminderReceiver extends BroadcastReceiver {
             Intent intent
     ) {
 
+        if (intent == null) {
+            return;
+        }
+
         String id =
                 intent.getStringExtra("id");
 
@@ -36,9 +42,28 @@ public class ReminderReceiver extends BroadcastReceiver {
         String action =
                 intent.getAction();
 
+        if (id == null ||
+                id.trim().isEmpty()) {
+
+            id =
+                    String.valueOf(
+                            System.currentTimeMillis()
+                    );
+        }
+
+        if (title == null ||
+                title.trim().isEmpty()) {
+
+            title =
+                    "Pet Care Reminder";
+        }
+
+        /*
+         * DONE
+         */
         if (ACTION_DONE.equals(action)) {
 
-            NotificationHelper.cancel(
+            cancelNotification(
                     context,
                     id
             );
@@ -46,6 +71,9 @@ public class ReminderReceiver extends BroadcastReceiver {
             return;
         }
 
+        /*
+         * SNOOZE 10 MINUTES
+         */
         if (ACTION_SNOOZE_10.equals(action)) {
 
             scheduleSnooze(
@@ -55,7 +83,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                     10
             );
 
-            NotificationHelper.cancel(
+            cancelNotification(
                     context,
                     id
             );
@@ -63,6 +91,9 @@ public class ReminderReceiver extends BroadcastReceiver {
             return;
         }
 
+        /*
+         * SNOOZE 30 MINUTES
+         */
         if (ACTION_SNOOZE_30.equals(action)) {
 
             scheduleSnooze(
@@ -72,13 +103,17 @@ public class ReminderReceiver extends BroadcastReceiver {
                     30
             );
 
-            NotificationHelper.cancel(
+            cancelNotification(
                     context,
                     id
             );
 
             return;
         }
+
+        /*
+         * SHOW ALARM
+         */
 
         Intent alarmIntent =
                 new Intent(
@@ -99,33 +134,37 @@ public class ReminderReceiver extends BroadcastReceiver {
         alarmIntent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
         );
+
+        int requestCode =
+                Math.abs(
+                        id.hashCode()
+                );
 
         PendingIntent fullScreenIntent =
                 PendingIntent.getActivity(
                         context,
-                        Math.abs(
-                                id.hashCode()
-                        ),
+                        requestCode,
                         alarmIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                                 | PendingIntent.FLAG_IMMUTABLE
                 );
 
-        android.app.NotificationManager manager =
-                (android.app.NotificationManager)
+        NotificationManager manager =
+                (NotificationManager)
                         context.getSystemService(
                                 Context.NOTIFICATION_SERVICE
                         );
 
         if (manager != null) {
 
-            android.app.Notification.Builder builder;
+            Notification.Builder builder;
 
             if (Build.VERSION.SDK_INT >= 26) {
 
                 builder =
-                        new android.app.Notification.Builder(
+                        new Notification.Builder(
                                 context,
                                 "petcare_reminders"
                         );
@@ -133,7 +172,7 @@ public class ReminderReceiver extends BroadcastReceiver {
             } else {
 
                 builder =
-                        new android.app.Notification.Builder(
+                        new Notification.Builder(
                                 context
                         );
             }
@@ -149,10 +188,10 @@ public class ReminderReceiver extends BroadcastReceiver {
                             title
                     )
                     .setCategory(
-                            android.app.Notification.CATEGORY_ALARM
+                            Notification.CATEGORY_ALARM
                     )
                     .setPriority(
-                            android.app.Notification.PRIORITY_MAX
+                            Notification.PRIORITY_MAX
                     )
                     .setOngoing(true)
                     .setAutoCancel(false)
@@ -162,14 +201,49 @@ public class ReminderReceiver extends BroadcastReceiver {
                     );
 
             manager.notify(
-                    Math.abs(
-                            id.hashCode() % 100000
-                    ),
+                    getNotificationId(id),
                     builder.build()
             );
         }
     }
 
+    /*
+     * Cancel notification
+     */
+    private void cancelNotification(
+            Context context,
+            String id
+    ) {
+
+        NotificationManager manager =
+                (NotificationManager)
+                        context.getSystemService(
+                                Context.NOTIFICATION_SERVICE
+                        );
+
+        if (manager != null) {
+
+            manager.cancel(
+                    getNotificationId(id)
+            );
+        }
+    }
+
+    /*
+     * Notification ID
+     */
+    private int getNotificationId(
+            String id
+    ) {
+
+        return Math.abs(
+                id.hashCode() % 100000
+        );
+    }
+
+    /*
+     * Schedule snooze
+     */
     private void scheduleSnooze(
             Context context,
             String id,
@@ -201,28 +275,40 @@ public class ReminderReceiver extends BroadcastReceiver {
                 title
         );
 
+        intent.putExtra(
+                "timestamp",
+                trigger
+        );
+
+        int requestCode =
+                Math.abs(
+                        id.hashCode()
+                ) + minutes;
+
         PendingIntent pendingIntent =
                 PendingIntent.getBroadcast(
                         context,
-                        Math.abs(
-                                id.hashCode()
-                        ) + minutes,
+                        requestCode,
                         intent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                                 | PendingIntent.FLAG_IMMUTABLE
                 );
 
-        AlarmManager manager =
+        AlarmManager alarmManager =
                 (AlarmManager)
                         context.getSystemService(
                                 Context.ALARM_SERVICE
                         );
 
-        if (manager != null) {
+        if (alarmManager == null) {
+            return;
+        }
 
-            if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 31) {
 
-                manager.setExactAndAllowWhileIdle(
+            if (alarmManager.canScheduleExactAlarms()) {
+
+                alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         trigger,
                         pendingIntent
@@ -230,12 +316,28 @@ public class ReminderReceiver extends BroadcastReceiver {
 
             } else {
 
-                manager.setExact(
+                alarmManager.setAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         trigger,
                         pendingIntent
                 );
             }
+
+        } else if (Build.VERSION.SDK_INT >= 23) {
+
+            alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    trigger,
+                    pendingIntent
+            );
+
+        } else {
+
+            alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    trigger,
+                    pendingIntent
+            );
         }
     }
 }
