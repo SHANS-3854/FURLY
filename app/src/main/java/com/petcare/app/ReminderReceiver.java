@@ -1,7 +1,7 @@
 package com.petcare.app;
 
 import android.app.AlarmManager;
-import android.app.BroadcastReceiver;
+import android.content.BroadcastReceiver;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
