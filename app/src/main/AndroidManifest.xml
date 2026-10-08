@@ -2,16 +2,28 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Internet -->
+    <uses-permission
+        android:name="android.permission.INTERNET" />
 
+    <!-- Notifications -->
     <uses-permission
         android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Exact alarms -->
     <uses-permission
         android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
+    <!-- Full-screen alarm -->
     <uses-permission
         android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <!-- Location -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -20,11 +32,13 @@
         android:theme="@style/Theme.PetCare"
         android:usesCleartextTraffic="true">
 
+        <!-- Alarm screen -->
         <activity
             android:name=".AlarmActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
+        <!-- Main app -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -41,10 +55,12 @@
 
         </activity>
 
+        <!-- Reminder alarm receiver -->
         <receiver
             android:name=".ReminderReceiver"
             android:exported="false" />
 
+        <!-- Snooze receiver -->
         <receiver
             android:name=".SnoozeReceiver"
             android:exported="false" />
